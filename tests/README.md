@@ -6,9 +6,8 @@ Automated checks for the Signal Owl payloads. Run in CI on every push to
 ## What runs
 
 - **shellcheck** (`scripts/lint.sh`) — static analysis of every `*.sh` and
-  `payload.txt`. The gate fails only on `error`-severity findings so the
-  baseline stays green; warnings are printed for visibility. Run
-  `STRICT=1 scripts/lint.sh` to fail on warnings too.
+  `payload.txt`. The gate fails on `warning`-severity findings and above.
+  Override with `SHELLCHECK_SEVERITY=error scripts/lint.sh` to relax it.
 - **bats** (`scripts/test.sh` / `bats tests/`) — unit tests for the payload
   logic, run with the hardware commands (`ip`, `iwlist`, `hcitool`, `nmap`,
   `LED`, ...) stubbed out.
@@ -40,6 +39,5 @@ the parsing/decision logic.
 | `general/arming-mode` | firmware-version gate |
 | all payloads | shebang + Title/Author/Version metadata |
 
-Good next additions: README-per-payload enforcement, coverage for the
-`Delayed-AP-Attack` capture-move path, and fixing the warning-level
-shellcheck findings (then flipping the gate to `STRICT`).
+Good next additions: README-per-payload enforcement and coverage for the
+`Delayed-AP-Attack` capture-move path.

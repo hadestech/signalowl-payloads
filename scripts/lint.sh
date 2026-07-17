@@ -3,9 +3,9 @@
 # Lint every payload and extension with shellcheck.
 #
 # Payloads carry a `.txt` extension but are bash scripts, so we force the
-# shell dialect. The gate fails only on `error`-severity findings to keep a
-# green baseline; warnings are printed for visibility but don't fail the run.
-# Set STRICT=1 to fail on warnings too.
+# shell dialect. The gate fails on `warning`-severity findings and above.
+# Override with SHELLCHECK_SEVERITY (error|warning|info|style) to relax or
+# tighten it, e.g. SHELLCHECK_SEVERITY=error scripts/lint.sh.
 
 set -uo pipefail
 
@@ -18,8 +18,7 @@ if [ "${#files[@]}" -eq 0 ]; then
     exit 1
 fi
 
-gate_severity="error"
-[ "${STRICT:-0}" = "1" ] && gate_severity="warning"
+gate_severity="${SHELLCHECK_SEVERITY:-warning}"
 
 echo "== shellcheck report (all severities) =="
 for f in "${files[@]}"; do

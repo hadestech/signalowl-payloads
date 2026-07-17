@@ -4,8 +4,9 @@
 # Version: 1.0
 
 # WiFi Client Setup
-WIFI_SSID="network-name"
-WIFI_PASS="passphrase"
+# Exported so the WIFI_CONNECT extension function picks them up from the environment.
+export WIFI_SSID="network-name"
+export WIFI_PASS="passphrase"
 
 LED SETUP
 WIFI_CONNECT
