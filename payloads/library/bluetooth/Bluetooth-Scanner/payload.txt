@@ -39,7 +39,6 @@ function scan_bluetooth() {
 
 function interrogate_bluetooth() {
 	LED ATTACK
-	current_bt=$(sed -n "$on"p /tmp/bluetooth_scan | awk '{print $2}')
 	current_bt_mac=$(sed -n "$on"p /tmp/bluetooth_scan | awk '{print $1}')
 	if grep -i -q "$current_bt_mac" /tmp/bt_scanned; then
 		[[ $DEBUG == 1 ]] && echo --- "$current_bt_mac": Already interrogated, skipping.  | tee -a /tmp/payload.log
@@ -81,8 +80,8 @@ function runonce() {
 	[[ $DEBUG == 1 ]] && echo Our local bluetooth device info: | tee -a /tmp/payload.log
 	[[ $DEBUG == 1 ]] && hciconfig | tee -a /tmp/payload.log
 	[[ $DEBUG == 1 ]] && echo "-----------------------------------------" | tee -a /tmp/payload.log
-	> /tmp/bluetooth_scan
-	> /tmp/bt_scanned
+	: > /tmp/bluetooth_scan
+	: > /tmp/bt_scanned
 	mkdir -p $LOOT_DIR
 	touch $LOOT_DIR/$BT_OUTFILE
 	touch $LOOT_DIR/$BT_INFOFILE

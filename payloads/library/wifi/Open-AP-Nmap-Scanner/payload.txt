@@ -27,7 +27,7 @@ function scan_wifi() {
 function check_ap() {
 	current_ap=$(sed -n "$on"p /tmp/open)
 	[[ $DEBUG == 1 ]] && echo "-------------------------------" | tee -a /tmp/payload.log
-	current_ap_mac=$(cat /tmp/wifi_scan | grep "$current_ap" -B5 | grep Address | awk {'print $5'} | head -1)
+	current_ap_mac=$(cat /tmp/wifi_scan | grep "$current_ap" -B5 | grep Address | awk '{print $5}' | head -1)
 	[[ $DEBUG == 1 ]] && echo Selected AP MAC: "$current_ap_mac" | tee -a /tmp/payload.log
 	if grep -i -q "$current_ap_mac" /tmp/nmap_scanned; then
 		[[ $DEBUG == 1 ]] && echo Skipping - Already scanned AP: "$current_ap" with MAC: "$current_ap_mac" | tee -a /tmp/payload.log
@@ -49,7 +49,7 @@ function connect_wifi() {
 	while [ -z "$SUBNET" ]; do
 		sleep 1 && find_subnet
 	done
-	APMAC=$(iw wlan0 link | grep Connected | awk {print'$3'})
+	APMAC=$(iw wlan0 link | grep Connected | awk '{print $3}')
 	[[ $DEBUG == 1 ]] && echo "AP MAC Address/BSSID: $APMAC" | tee -a /tmp/payload.log
 	[[ $DEBUG == 1 ]] && iwconfig wlan0 | grep ESSID | tee -a /tmp/payload.log
 	[[ $DEBUG == 1 ]] && ifconfig wlan0 | grep inet | tee -a /tmp/payload.log
