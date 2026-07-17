@@ -34,3 +34,13 @@ payloads() {
     done < <(payloads)
     [ -z "$failures" ] || { echo "Missing metadata:$failures"; false; }
 }
+
+@test "every payload directory has a README.md" {
+    local failures=""
+    while IFS= read -r p; do
+        local dir
+        dir="$(dirname "$p")"
+        [ -f "$dir/README.md" ] || failures+=$'\n'"$dir"
+    done < <(payloads)
+    [ -z "$failures" ] || { echo "Missing README.md:$failures"; false; }
+}
